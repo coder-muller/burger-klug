@@ -105,7 +105,7 @@ export default function Produtos() {
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Carteira</DialogTitle>
+                        <DialogTitle>Novo Produto</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit}>
                         <div>

@@ -45,20 +45,40 @@ export default function Vendas() {
 
 
     const handleRemoveItem = (e: React.MouseEvent, produto: Produto) => {
-        e.stopPropagation()
-        const novaQuantidade = (quantidades[produto.nome] || 0) - 1
+        e.stopPropagation();
+    
+        const novaQuantidade = (quantidades[produto.nome] || 0) - 1;
+        
         if (novaQuantidade > 0) {
-            setQuantidades(prev => ({ ...prev, [produto.nome]: novaQuantidade }))
+            setQuantidades(prev => ({ ...prev, [produto.nome]: novaQuantidade }));
         } else {
             setQuantidades(prev => {
-                const newQuantidades = { ...prev }
-                delete newQuantidades[produto.nome]
-                return newQuantidades
-            })
+                const newQuantidades = { ...prev };
+                delete newQuantidades[produto.nome];
+                return newQuantidades;
+            });
         }
-        setItensVenda(itensVenda.filter(p => p !== produto))
-        toast.info("Item removido com sucesso!", { description: `${produto.nome} valor: ${(produto.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` })
-    }
+
+        setItensVenda(prevItens => {
+            const index = prevItens.findIndex(p => p.nome === produto.nome);
+            if (index !== -1) {
+                const newItens = [...prevItens];
+                newItens.splice(index, 1)
+                return newItens;
+            }
+            return prevItens;
+        });
+    
+        toast.info("Item removido com sucesso!", {
+            description: `${produto.nome} valor: ${(produto.valor).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`
+        });
+    };
+    
 
     return (
         <div className="flex flex-col items-center justify-center w-11/12 m-auto gap-2">
@@ -76,7 +96,7 @@ export default function Vendas() {
                     <CardHeader>
                         <CardTitle>Hamburgueres</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
+                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto p-3">
                         {Hamburgueres.map((produto) => (
                             <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
                                 <div className="flex items-center justify-between w-full">
@@ -98,7 +118,7 @@ export default function Vendas() {
                     <CardHeader>
                         <CardTitle>Batatas</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
+                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto">
                         {Batatas.map((produto) => (
                             <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
                                 <div className="flex items-center justify-between w-full">
@@ -119,7 +139,7 @@ export default function Vendas() {
                     <CardHeader>
                         <CardTitle>Bebidas</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
+                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto">
                         {Bebidas.map((produto) => (
                             <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
                                 <div className="flex items-center justify-between w-full">
@@ -140,7 +160,7 @@ export default function Vendas() {
                     <CardHeader>
                         <CardTitle>Adicionais</CardTitle>
                     </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[500px] overflow-y-auto">
+                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto">
                         {Adicionais.map((produto) => (
                             <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
                                 <div className="flex items-center justify-between w-full">
