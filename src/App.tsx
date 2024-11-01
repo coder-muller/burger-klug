@@ -9,13 +9,13 @@ export default function App() {
     <div className="flex flex-col items-center justify-start w-screen p-3">
       <div className="w-full flex items-center justify-center">
         <div className="fixed top-4 right-4">
-          <ModeToggle/>
+          <ModeToggle />
         </div>
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyOl89nc8Kbd_khdQfhd7Cu0nnoBJkmACYuQ&s" alt="logo" className="w-20 h-20  rounded-full" />
       </div>
       <Separator className="my-4 border-2" />
       <Tabs defaultValue="vendas">
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center">  
           <TabsList>
             <TabsTrigger value="vendas">Vendas</TabsTrigger>
             <TabsTrigger value="produtos">Produtos</TabsTrigger>

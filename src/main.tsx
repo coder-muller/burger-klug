@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from './components/ui/sonner.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+  <ThemeProvider defaultTheme="system" storageKey="vite-ui-theme">
     <StrictMode>
       <Toaster richColors />
       <App />
