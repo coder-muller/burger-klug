@@ -107,6 +107,9 @@ export default function Vendas() {
     const limparPedido = () => {
         setItensVenda([]);
         setQuantidades({});
+        setNomeCliente('')
+        setEnderecoCliente('')
+        setValorTele('')
         toast.info("Pedido limpo com sucesso!");
     };
 
@@ -187,6 +190,91 @@ export default function Vendas() {
             maximumFractionDigits: 2
         });
     }
+
+    function agruparItens(pedido: Produto[]): { item: Produto; quantidade: number }[] {
+        const agrupado: { item: Produto; quantidade: number }[] = [];
+      
+        pedido.forEach((novoItem) => {
+          const itemExistente = agrupado.find(({ item }) =>
+            item.nome === novoItem.nome &&
+            item.adicionais.length === novoItem.adicionais.length &&
+            item.adicionais.every((adicional, index) => 
+              adicional.nome === novoItem.adicionais[index].nome &&
+              adicional.valor === novoItem.adicionais[index].valor)
+          );
+          if (itemExistente) {
+            itemExistente.quantidade += 1;
+          } else {
+            agrupado.push({ item: novoItem, quantidade: 1 });
+          }
+        });
+        return agrupado;
+      }
+
+      function formatarPedidoParaImpressao(pedido: Produto[], cliente: { nome: string; endereco: string }, valorTotal: string, valorTele: number): string {
+        const agrupado = agruparItens(pedido);
+        
+        return `
+          <div style="display: flex; flex-direction: column; align-items: center; justfity-content: center; margin: 20px;">
+            <div style="text-align: center;">
+              <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyOl89nc8Kbd_khdQfhd7Cu0nnoBJkmACYuQ&s" alt="Logo" style="width: 100px; border-radius: 100%;">
+            </div>
+            
+            <div style="text-align: center; width: 100%;">
+              <h2>${cliente.nome}</h2>
+              <p>${cliente.endereco}</p>
+            </div>
+      
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+              <thead>
+                <tr>
+                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Qtde</th>
+                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Item</th>
+                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Valor</th>
+                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Adicionais</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${agrupado.map(({ item, quantidade }) => {
+                  const adicionaisTexto = item.adicionais.map(adicional => `+ ${adicional.nome}`).join(', ');
+                  const adicionaisValor = item.adicionais.map(adicional => adicional.valor).reduce((acumulador, valor) => acumulador + valor, 0);
+                  return `
+                    <tr>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.nome}</td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">R$ ${(item.valor + adicionaisValor).toFixed(2)}</td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${adicionaisTexto}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+      
+            <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
+              <p>Valor Tele: R$ ${valorTele.toFixed(2)}</p>
+              <h3>Total: R$ ${valorTotal}</h3>
+            </div>
+          </div>
+        `;
+      }
+
+      function imprimirPedido(pedido: Produto[]): void {
+        const textoPedido = formatarPedidoParaImpressao(pedido, { nome: nomeCliente, endereco: enderecoCliente }, calcularTotalPedido(pedido), Number(valorTele));
+      
+        const janelaImpressao = window.open('', '_blank');
+        if (janelaImpressao) {
+          janelaImpressao.document.write(`
+            <html>
+              <head><title>Pedido para Cozinha</title></head>
+              <body>
+                ${textoPedido}
+                <script>window.print(); window.close();</script>
+              </body>
+            </html>
+          `);
+        }
+        setIsOpen(false)
+      }
 
     return (
         <div className="flex flex-col items-center justify-center w-11/12 m-auto gap-2">
@@ -345,7 +433,7 @@ export default function Vendas() {
 
                         </div>
                         <SheetFooter>
-                            <Button variant={"default"} onClick={() => toast.info("Ainda em Desenvolvimento...")}>
+                            <Button variant={"default"} onClick={() => imprimirPedido(itensVenda)}> 
                                 Finalizar Pedido
                             </Button>
                             <SheetClose asChild>
