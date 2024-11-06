@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Vendas from "./tabs/vendas";
 import Produtos from "./tabs/produtos";
 import { ModeToggle } from "./components/mode-toggle";
+import Pedidos from "./tabs/pedidos";
 
 export default function App() {
   return (
@@ -15,9 +16,10 @@ export default function App() {
       </div>
       <Separator className="my-4 border-2" />
       <Tabs defaultValue="vendas">
-        <div className="flex items-center justify-center">  
+        <div className="flex items-center justify-center">
           <TabsList>
             <TabsTrigger value="vendas">Vendas</TabsTrigger>
+            <TabsTrigger value="pedidos">Histórico de Pedidos</TabsTrigger>
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
           </TabsList>
         </div>
@@ -26,6 +28,9 @@ export default function App() {
         </TabsContent>
         <TabsContent value="produtos" className="w-screen px-10 py-3">
           <Produtos />
+        </TabsContent>
+        <TabsContent value="pedidos" className="w-screen px-10 py-3">
+          <Pedidos />
         </TabsContent>
       </Tabs>
     </div>

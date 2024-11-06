@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Sheet, SheetClose, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { MinusCircle, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import IMask from 'imask'
 import { v4 as uuidv4 } from 'uuid';
+import { CardComponent } from "@/components/produtoList";
 
 interface Produto {
     id: string,
@@ -193,88 +193,91 @@ export default function Vendas() {
 
     function agruparItens(pedido: Produto[]): { item: Produto; quantidade: number }[] {
         const agrupado: { item: Produto; quantidade: number }[] = [];
-      
+
         pedido.forEach((novoItem) => {
-          const itemExistente = agrupado.find(({ item }) =>
-            item.nome === novoItem.nome &&
-            item.adicionais.length === novoItem.adicionais.length &&
-            item.adicionais.every((adicional, index) => 
-              adicional.nome === novoItem.adicionais[index].nome &&
-              adicional.valor === novoItem.adicionais[index].valor)
-          );
-          if (itemExistente) {
-            itemExistente.quantidade += 1;
-          } else {
-            agrupado.push({ item: novoItem, quantidade: 1 });
-          }
+            const itemExistente = agrupado.find(({ item }) =>
+                item.nome === novoItem.nome &&
+                item.adicionais.length === novoItem.adicionais.length &&
+                item.adicionais.every((adicional, index) =>
+                    adicional.nome === novoItem.adicionais[index].nome &&
+                    adicional.valor === novoItem.adicionais[index].valor)
+            );
+            if (itemExistente) {
+                itemExistente.quantidade += 1;
+            } else {
+                agrupado.push({ item: novoItem, quantidade: 1 });
+            }
         });
         return agrupado;
-      }
+    }
 
-      function formatarPedidoParaImpressao(pedido: Produto[], cliente: { nome: string; endereco: string }, valorTotal: string, valorTele: number): string {
+    function formatarPedidoParaImpressao(pedido: Produto[], cliente: { nome: string; endereco: string }, valorTotal: string, valorTele: number): string {
         const agrupado = agruparItens(pedido);
-        
+
         return `
           <div style="display: flex; flex-direction: column; align-items: center; justfity-content: center; margin: 20px;">
             <div style="text-align: center;">
               <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyOl89nc8Kbd_khdQfhd7Cu0nnoBJkmACYuQ&s" alt="Logo" style="width: 100px; border-radius: 100%;">
             </div>
-            
             <div style="text-align: center; width: 100%;">
               <h2>${cliente.nome}</h2>
               <p>${cliente.endereco}</p>
             </div>
-      
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
               <thead>
                 <tr>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Qtde</th>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Item</th>
-                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Valor</th>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Adicionais</th>
+                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Valor</th>
                 </tr>
               </thead>
               <tbody>
                 ${agrupado.map(({ item, quantidade }) => {
-                  const adicionaisTexto = item.adicionais.map(adicional => `+ ${adicional.nome}`).join(', ');
-                  const adicionaisValor = item.adicionais.map(adicional => adicional.valor).reduce((acumulador, valor) => acumulador + valor, 0);
-                  return `
+            const adicionaisTexto = item.adicionais.map(adicional => `${adicional.nome}`).join(', ');
+            const adicionaisValor = item.adicionais.map(adicional => adicional.valor).reduce((acumulador, valor) => acumulador + valor, 0);
+            return `
                     <tr>
                       <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
-                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${item.nome}</td>
-                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">R$ ${(item.valor + adicionaisValor).toFixed(2)}</td>
-                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${adicionaisTexto}</td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>${item.nome}</strong></td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>${adicionaisTexto}</strong></td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(item.valor + adicionaisValor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   `;
-                }).join('')}
+        }).join('')}
               </tbody>
             </table>
       
             <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
-              <p>Valor Tele: R$ ${valorTele.toFixed(2)}</p>
-              <h3>Total: R$ ${valorTotal}</h3>
+              <p style="font-size: 10px;">Valor Tele: R$ ${valorTele.toFixed(2)}</p>
+              <h3>Total: ${(valorTotal)}</h3>
             </div>
           </div>
         `;
-      }
+    }
 
-      function imprimirPedido(pedido: Produto[]): void {
+    function imprimirPedido(pedido: Produto[]): void {
         const textoPedido = formatarPedidoParaImpressao(pedido, { nome: nomeCliente, endereco: enderecoCliente }, calcularTotalPedido(pedido), Number(valorTele));
-      
+
         const janelaImpressao = window.open('', '_blank');
         if (janelaImpressao) {
-          janelaImpressao.document.write(`
+            janelaImpressao.document.write(`
             <html>
               <head><title>Pedido para Cozinha</title></head>
               <body>
                 ${textoPedido}
-                <script>window.print(); window.close();</script>
+                <script>
+                    setTimeout(function() {
+                        window.print();
+                        window.close();
+                    }, 500); 
+                </script>
               </body>
             </html>
           `);
         }
         setIsOpen(false)
-      }
+    }    
 
     return (
         <div className="flex flex-col items-center justify-center w-11/12 m-auto gap-2">
@@ -294,92 +297,12 @@ export default function Vendas() {
                 </div>
             </div>
             <div className="w-full p-3 flex items-start justify-center gap-3">
-                <Card className="w-1/4">
-                    <CardHeader>
-                        <CardTitle>Hamburgueres</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto p-3">
-                        {Hamburgueres.map((produto) => (
-                            <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
-                                <div className="flex items-center justify-between w-full">
-                                    <h1>{produto.nome}</h1>
-                                    <div className="flex items-center gap-4">
-                                        {quantidades[produto.nome] > 0 && (
-                                            <>
-                                                <span>{quantidades[produto.nome]}</span>
-                                                <MinusCircle className="cursor-pointer" onClick={(e) => handleRemoveItem(e, produto)} />
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
-                <Card className="w-1/4">
-                    <CardHeader>
-                        <CardTitle>Batatas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto">
-                        {Batatas.map((produto) => (
-                            <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
-                                <div className="flex items-center justify-between w-full">
-                                    <h1>{produto.nome}</h1>
-                                    <div className="flex items-center gap-4">
-                                        {quantidades[produto.nome] > 0 && (
-                                            <>
-                                                <span>{quantidades[produto.nome]}</span>
-                                                <MinusCircle className="cursor-pointer" onClick={(e) => handleRemoveItem(e, produto)} />
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card><Card className="w-1/4">
-                    <CardHeader>
-                        <CardTitle>Bebidas</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto">
-                        {Bebidas.map((produto) => (
-                            <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
-                                <div className="flex items-center justify-between w-full">
-                                    <h1>{produto.nome}</h1>
-                                    <div className="flex items-center gap-4">
-                                        {quantidades[produto.nome] > 0 && (
-                                            <>
-                                                <span>{quantidades[produto.nome]}</span>
-                                                <MinusCircle className="cursor-pointer" onClick={(e) => handleRemoveItem(e, produto)} />
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card><Card className="w-1/4">
-                    <CardHeader>
-                        <CardTitle>Adicionais</CardTitle>
-                    </CardHeader>
-                    <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto">
-                        {Adicionais.map((produto) => (
-                            <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => handleAddItem(produto)}>
-                                <div className="flex items-center justify-between w-full">
-                                    <h1>{produto.nome}</h1>
-                                    <div className="flex items-center gap-4">
-                                        {quantidades[produto.nome] > 0 && (
-                                            <>
-                                                <span>{quantidades[produto.nome]}</span>
-                                                <MinusCircle className="cursor-pointer" onClick={(e) => handleRemoveItem(e, produto)} />
-                                            </>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </CardContent>
-                </Card>
+
+                <CardComponent title="Hamburgueres" itens={Hamburgueres} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
+                <CardComponent title="Batatas" itens={Batatas} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
+                <CardComponent title="Bebidas" itens={Bebidas} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
+                <CardComponent title="Adicionais" itens={Adicionais} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
+
                 <Sheet open={isOpen} onOpenChange={setIsOpen}>
                     <SheetContent>
                         <SheetHeader>
@@ -433,7 +356,7 @@ export default function Vendas() {
 
                         </div>
                         <SheetFooter>
-                            <Button variant={"default"} onClick={() => imprimirPedido(itensVenda)}> 
+                            <Button variant={"default"} onClick={() => imprimirPedido(itensVenda)}>
                                 Finalizar Pedido
                             </Button>
                             <SheetClose asChild>
