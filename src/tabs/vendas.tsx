@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import IMask from 'imask'
 import { v4 as uuidv4 } from 'uuid';
 import { CardComponent } from "@/components/produtoList";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Produto {
     id: string,
@@ -43,6 +44,8 @@ export default function Vendas() {
     const [nomeCliente, setNomeCliente] = useState<string>('')
     const [enderecoCliente, setEnderecoCliente] = useState<string>('')
     const [valorTele, setValorTele] = useState<string>('')
+    const [formaPagamento, setFormaPagamento] = useState<string>('')
+    const [trocoPquanto, setTrocoPquanto] = useState<string>('')
 
     const [itensVenda, setItensVenda] = useState<Produto[]>([])
     const [quantidades, setQuantidades] = useState<{ [key: string]: number }>({})
@@ -222,6 +225,7 @@ export default function Vendas() {
             <div style="text-align: center; width: 100%;">
               <h2>${cliente.nome}</h2>
               <p>${cliente.endereco}</p>
+              <p>${formaPagamento}</p>
             </div>
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
               <thead>
@@ -251,6 +255,8 @@ export default function Vendas() {
             <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
               <p style="font-size: 10px;">Valor Tele: R$ ${valorTele.toFixed(2)}</p>
               <h3>Total: ${(valorTotal)}</h3>
+              <p style="font-size: 12px;">${formaPagamento == "Dinheiro" ? `Valor Pago: ${(parseFloat((trocoPquanto).replace(".", "").replace(",", "."))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</p>
+              <p style="font-size: 12px;"><strong>${formaPagamento == "Dinheiro" ? `Troco: ${(parseFloat(((trocoPquanto).replace(".", "").replace(",", "."))) - parseFloat((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", ""))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</strong></p>
             </div>
           </div>
         `;
@@ -277,7 +283,7 @@ export default function Vendas() {
           `);
         }
         setIsOpen(false)
-    }    
+    }
 
     return (
         <div className="flex flex-col items-center justify-center w-11/12 m-auto gap-2">
@@ -308,7 +314,7 @@ export default function Vendas() {
                         <SheetHeader>
                             <SheetTitle>Resumo do Pedido</SheetTitle>
                         </SheetHeader>
-                        <div className="flex flex-col gap-2 w-full max-h-[620px] overflow-y-auto my-4">
+                        <div className="flex flex-col gap-2 w-full max-h-[560px] overflow-y-auto my-4">
                             {itensVenda.map((produto) => (
                                 <>
                                     <div
@@ -351,6 +357,30 @@ export default function Vendas() {
                                     <Label>Valor da Tele</Label>
                                     <Input placeholder="Valor da tele" ref={valorTeleRef} value={valorTele} onChange={e => setValorTele(e.target.value)} />
                                 </div>
+                                <div>
+                                    <Label>Forma de Pagamento</Label>
+                                    <Select defaultValue={formaPagamento} onValueChange={(e) => setFormaPagamento(e)} value={formaPagamento}>
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder="Selecione uma categoria" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectItem value="PIX">PIX</SelectItem>
+                                                <SelectItem value="Cartao de Crédito">Cartao de Crédito</SelectItem>
+                                                <SelectItem value="Cartao de Débito">Cartão de Débito</SelectItem>
+                                                <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+
+                                {formaPagamento === "Dinheiro" && (
+                                    <div>
+                                        <Label>Troco para quanto?</Label>
+                                        <Input placeholder="Valor do pagamento" value={trocoPquanto} onChange={e => setTrocoPquanto(e.target.value)} />
+                                    </div>
+                                )}
+
                             </div>
 
 
