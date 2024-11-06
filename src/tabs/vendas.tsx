@@ -113,6 +113,7 @@ export default function Vendas() {
         setNomeCliente('')
         setEnderecoCliente('')
         setValorTele('')
+        setTrocoPquanto('')
         toast.info("Pedido limpo com sucesso!");
     };
 
