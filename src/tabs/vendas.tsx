@@ -29,9 +29,7 @@ export default function Vendas() {
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isDialogAdicionaisOpen, setIsDialogAdicionaisOpen] = useState<boolean>(false)
-    const [isPasswordOpen, setIsPasswordOpen] = useState<boolean>(false)
-    const [password, setPassword] = useState<string>('')
-
+    
     const [selectedItem, setSelectedItem] = useState<Produto | null>(null)
 
     const [nomeAdicional, setNomeAdicional] = useState<string>('')
@@ -478,23 +476,6 @@ export default function Vendas() {
                                 <Button variant={"secondary"}>Cancelar</Button>
                             </DialogClose>
                         </DialogFooter>
-                    </DialogContent>
-                </Dialog>
-                <Dialog open={isPasswordOpen} onOpenChange={setIsPasswordOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Senha</DialogTitle>
-                        </DialogHeader>
-                        <div className="grid grid-cols-3 gap-2">
-                            <div className="col-span-2">
-                                <Label>Senha</Label>
-                                <Input type="password" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} />
-                            </div>
-                            <DialogFooter>
-                                <Button onClick={() => setIsPasswordOpen(false)}>Cancelar</Button>
-                                <Button onClick={() => passwordHandler()}>Confirmar</Button>
-                            </DialogFooter>
-                        </div>
                     </DialogContent>
                 </Dialog>
             </div>
