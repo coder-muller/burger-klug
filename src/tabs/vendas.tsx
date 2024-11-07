@@ -29,7 +29,7 @@ export default function Vendas() {
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isDialogAdicionaisOpen, setIsDialogAdicionaisOpen] = useState<boolean>(false)
-    
+
     const [selectedItem, setSelectedItem] = useState<Produto | null>(null)
 
     const [nomeAdicional, setNomeAdicional] = useState<string>('')
@@ -247,7 +247,7 @@ export default function Vendas() {
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${item.nome}</strong></td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${adicionaisTexto}</strong></td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(item.valor + adicionaisValor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(quantidade * (item.valor + adicionaisValor)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   `;
         }).join('')}
