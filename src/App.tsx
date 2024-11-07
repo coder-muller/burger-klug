@@ -4,12 +4,29 @@ import Vendas from "./tabs/vendas";
 import Produtos from "./tabs/produtos";
 import { ModeToggle } from "./components/mode-toggle";
 import Pedidos from "./tabs/pedidos";
+import { Button } from "./components/ui/button";
+import { migrateDataToFirebase, restoreDataFromFirebase } from "./migrate";
+import { CloudDownload, CloudUpload } from "lucide-react";
 
 export default function App() {
   return (
     <div className="flex flex-col items-center justify-start w-screen p-3">
       <div className="w-full flex items-center justify-center">
-        <div className="fixed top-4 right-4">
+        <div className="flex items-center justify-center gap-2 fixed top-4 right-4">
+          <Button variant={"secondary"} onClick={() => {
+            migrateDataToFirebase();
+          }}>
+            <CloudUpload />
+            Salvar Dados
+          </Button>
+
+          <Button variant={"secondary"} onClick={() => {
+            restoreDataFromFirebase ();
+            window.location.reload();
+          }}>
+            <CloudDownload />
+            Restaurar Dados
+          </Button>
           <ModeToggle />
         </div>
         <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyOl89nc8Kbd_khdQfhd7Cu0nnoBJkmACYuQ&s" alt="logo" className="w-20 h-20  rounded-full" />
