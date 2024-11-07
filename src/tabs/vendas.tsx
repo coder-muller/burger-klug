@@ -29,6 +29,8 @@ export default function Vendas() {
 
     const [isOpen, setIsOpen] = useState<boolean>(false)
     const [isDialogAdicionaisOpen, setIsDialogAdicionaisOpen] = useState<boolean>(false)
+    const [isPasswordOpen, setIsPasswordOpen] = useState<boolean>(false)
+    const [password, setPassword] = useState<string>('')
 
     const [selectedItem, setSelectedItem] = useState<Produto | null>(null)
 
@@ -106,7 +108,6 @@ export default function Vendas() {
         }
         setItensVenda([...itensVenda, item])
         setQuantidades(prev => ({ ...prev, [produto.nome]: (prev[produto.nome] || 0) + 1 }))
-        //toast.info("Item adicionado com sucesso!", { description: `${produto.nome} valor: ${(produto.valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` })
     }
 
     const limparPedido = () => {
@@ -116,6 +117,7 @@ export default function Vendas() {
         setEnderecoCliente('')
         setValorTele('')
         setTrocoPquanto('')
+        setObservacoes('')
         toast.info("Pedido limpo com sucesso!");
     };
 
@@ -341,6 +343,8 @@ export default function Vendas() {
         setIsOpen(false)
     }
 
+
+
     return (
         <div className="flex flex-col items-center justify-center w-11/12 m-auto gap-2">
             <div className="flex items-end justify-between w-full">
@@ -474,6 +478,23 @@ export default function Vendas() {
                                 <Button variant={"secondary"}>Cancelar</Button>
                             </DialogClose>
                         </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+                <Dialog open={isPasswordOpen} onOpenChange={setIsPasswordOpen}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Senha</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid grid-cols-3 gap-2">
+                            <div className="col-span-2">
+                                <Label>Senha</Label>
+                                <Input type="password" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} />
+                            </div>
+                            <DialogFooter>
+                                <Button onClick={() => setIsPasswordOpen(false)}>Cancelar</Button>
+                                <Button onClick={() => passwordHandler()}>Confirmar</Button>
+                            </DialogFooter>
+                        </div>
                     </DialogContent>
                 </Dialog>
             </div>
