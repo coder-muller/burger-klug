@@ -10,6 +10,7 @@ import IMask from 'imask'
 import { v4 as uuidv4 } from 'uuid';
 import { CardComponent } from "@/components/produtoList";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 interface Produto {
     id: string,
@@ -46,6 +47,7 @@ export default function Vendas() {
     const [valorTele, setValorTele] = useState<string>('')
     const [formaPagamento, setFormaPagamento] = useState<string>('')
     const [trocoPquanto, setTrocoPquanto] = useState<string>('')
+    const [observacoes, setObservacoes] = useState<string>('')
 
     const [itensVenda, setItensVenda] = useState<Produto[]>([])
     const [quantidades, setQuantidades] = useState<{ [key: string]: number }>({})
@@ -224,16 +226,15 @@ export default function Vendas() {
               <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyOl89nc8Kbd_khdQfhd7Cu0nnoBJkmACYuQ&s" alt="Logo" style="width: 100px; border-radius: 100%;">
             </div>
             <div style="text-align: center; width: 100%;">
-              <h2>${cliente.nome}</h2>
-              <p>${cliente.endereco}</p>
-              <p>${formaPagamento}</p>
+              <h2 style="font-weight: bold; margin-top: 20px;">${cliente.nome}</h2>
+              <p style="font-weight: bold; margin-top: 10px;">${cliente.endereco}</p>
             </div>
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
               <thead>
                 <tr>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Qtde</th>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Item</th>
-                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Adicionais</th>
+                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Observações</th>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Valor</th>
                 </tr>
               </thead>
@@ -243,21 +244,28 @@ export default function Vendas() {
             const adicionaisValor = item.adicionais.map(adicional => adicional.valor).reduce((acumulador, valor) => acumulador + valor, 0);
             return `
                     <tr>
-                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
-                      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>${item.nome}</strong></td>
-                      <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>${adicionaisTexto}</strong></td>
-                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(item.valor + adicionaisValor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${item.nome}</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${adicionaisTexto}</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(item.valor + adicionaisValor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                     </tr>
                   `;
         }).join('')}
+                     <tr>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;"></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">Tele</strong></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;"></td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(valorTele).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    </tr>
               </tbody>
             </table>
       
+            <p style="font-size: 14px; margin-top: 20px; border: 1px solid #000; padding: 10px;">${observacoes}</p>
+
             <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
-              <p style="font-size: 10px;">Valor Tele: R$ ${valorTele.toFixed(2)}</p>
-              <h3>Total: ${(valorTotal)}</h3>
-              <p style="font-size: 12px;">${formaPagamento == "Dinheiro" ? `Valor Pago: ${(parseFloat((trocoPquanto).replace(".", "").replace(",", "."))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</p>
-              <p style="font-size: 12px;"><strong>${formaPagamento == "Dinheiro" ? `Troco: ${(parseFloat(((trocoPquanto).replace(".", "").replace(",", "."))) - parseFloat((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", ""))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</strong></p>
+              <h3 style="font-weight: bold;">Total: ${(valorTotal)} - ${formaPagamento}</h3>
+              <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" ? `Valor Pago: ${(parseFloat((trocoPquanto).replace(".", "").replace(",", "."))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</p>
+              <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" ? `Troco: ${(parseFloat(((trocoPquanto).replace(".", "").replace(",", "."))) - parseFloat((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", ""))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</strong></p>
             </div>
           </div>
         `;
@@ -271,6 +279,53 @@ export default function Vendas() {
             janelaImpressao.document.write(`
             <html>
               <head><title>Pedido para Cozinha</title></head>
+
+              <style>
+                html, body, div, span, applet, object, iframe,
+                h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+                a, abbr, acronym, address, big, cite, code,
+                del, dfn, em, img, ins, kbd, q, s, samp,
+                small, strike, strong, sub, sup, tt, var,
+                b, u, i, center,
+                dl, dt, dd, ol, ul, li,
+                fieldset, form, label, legend,
+                table, caption, tbody, tfoot, thead, tr, th, td,
+                article, aside, canvas, details, embed, 
+                figure, figcaption, footer, header, hgroup, 
+                menu, nav, output, ruby, section, summary,
+                time, mark, audio, video {
+                    margin: 0;
+                    padding: 0;
+                    border: 0;
+                    font-size: 100%;
+                    font: inherit;
+                    vertical-align: baseline;
+                }
+                /* HTML5 display-role reset for older browsers */
+                article, aside, details, figcaption, figure, 
+                footer, header, hgroup, menu, nav, section {
+                    display: block;
+                }
+                body {
+                    line-height: 1;
+                }
+                ol, ul {
+                    list-style: none;
+                }
+                blockquote, q {
+                    quotes: none;
+                }
+                blockquote:before, blockquote:after,
+                q:before, q:after {
+                    content: '';
+                    content: none;
+                }
+                table {
+                    border-collapse: collapse;
+                    border-spacing: 0;
+                }
+              </style>
+
               <body>
                 ${textoPedido}
                 <script>
@@ -339,7 +394,6 @@ export default function Vendas() {
                                             </div>
                                         )
                                         )}
-
                                     </div>
                                 </>
                             ))}
@@ -367,8 +421,7 @@ export default function Vendas() {
                                         <SelectContent>
                                             <SelectGroup>
                                                 <SelectItem value="PIX">PIX</SelectItem>
-                                                <SelectItem value="Cartao de Crédito">Cartao de Crédito</SelectItem>
-                                                <SelectItem value="Cartao de Débito">Cartão de Débito</SelectItem>
+                                                <SelectItem value="Cartão">Cartão</SelectItem>
                                                 <SelectItem value="Dinheiro">Dinheiro</SelectItem>
                                             </SelectGroup>
                                         </SelectContent>
@@ -381,6 +434,10 @@ export default function Vendas() {
                                         <Input placeholder="Valor do pagamento" value={trocoPquanto} onChange={e => setTrocoPquanto(e.target.value)} />
                                     </div>
                                 )}
+                                <div>
+                                    <Label>Observações</Label>
+                                    <Textarea placeholder="Observações" value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
+                                </div>
 
                             </div>
 

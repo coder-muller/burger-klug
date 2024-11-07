@@ -80,7 +80,7 @@ export default function Produtos() {
                     Adicionar
                 </Button>
             </div>
-            <div className="w-full border rounded-md max-h-[500px] overflow-y-auto">
+            <div className="w-full border rounded-md max-h-[450px] overflow-y-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
