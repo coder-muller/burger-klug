@@ -10,6 +10,6 @@ createRoot(document.getElementById('root')!).render(
     <StrictMode>
       <Toaster richColors />
       <App />
-    </StrictMode>,
+    </StrictMode>
   </ThemeProvider>
 )

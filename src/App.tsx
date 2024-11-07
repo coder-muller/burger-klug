@@ -41,7 +41,6 @@ export default function App() {
             <CloudUpload />
             Salvar Dados
           </Button>
-
           <Button variant={"secondary"} onClick={() => {
             setUploadConexao(false)
             setIsPasswordOpen(true)
@@ -89,7 +88,6 @@ export default function App() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }

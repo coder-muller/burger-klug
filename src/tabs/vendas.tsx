@@ -340,9 +340,6 @@ export default function Vendas() {
         }
         setIsOpen(false)
     }
-
-
-
     return (
         <div className="flex flex-col items-center justify-center w-11/12 m-auto gap-2">
             <div className="flex items-end justify-between w-full">
@@ -361,12 +358,10 @@ export default function Vendas() {
                 </div>
             </div>
             <div className="w-full p-3 flex items-start justify-center gap-3">
-
                 <CardComponent title="Hamburgueres" itens={Hamburgueres} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
                 <CardComponent title="Batatas" itens={Batatas} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
                 <CardComponent title="Bebidas" itens={Bebidas} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
                 <CardComponent title="Adicionais" itens={Adicionais} quantidades={quantidades} onAdd={handleAddItem} onRemove={handleRemoveItem} />
-
                 <Sheet open={isOpen} onOpenChange={setIsOpen}>
                     <SheetContent>
                         <SheetHeader>
@@ -388,7 +383,6 @@ export default function Vendas() {
                                                 setIsDialogAdicionaisOpen(true)
                                             }} />
                                         </div>
-
                                         {produto.adicionais && produto.adicionais.map((adicional) => (
                                             <div className="flex items-center justify-between w-full px-2">
                                                 <h1>- {adicional.nome}</h1>
@@ -400,7 +394,6 @@ export default function Vendas() {
                                 </>
                             ))}
                             <h1 className="my-4 text-right"><span className="font-bold"> Total: R$ {calcularTotalPedido(itensVenda)}</span></h1>
-
                             <div className="flex flex-col">
                                 <div>
                                     <Label>Nome do Cliente</Label>
@@ -429,7 +422,6 @@ export default function Vendas() {
                                         </SelectContent>
                                     </Select>
                                 </div>
-
                                 {formaPagamento === "Dinheiro" && (
                                     <div>
                                         <Label>Troco para quanto?</Label>
@@ -440,10 +432,7 @@ export default function Vendas() {
                                     <Label>Observações</Label>
                                     <Textarea placeholder="Observações" value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
                                 </div>
-
                             </div>
-
-
                         </div>
                         <SheetFooter>
                             <Button variant={"default"} onClick={() => imprimirPedido(itensVenda)}>
