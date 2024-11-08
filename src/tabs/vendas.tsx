@@ -247,7 +247,7 @@ export default function Vendas() {
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${item.nome}</strong></td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${adicionaisTexto}</strong></td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(quantidade * (item.valor + adicionaisValor)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">R$ ${(quantidade * (item.valor + adicionaisValor))}</td>
                     </tr>
                   `;
         }).join('')}
@@ -255,18 +255,19 @@ export default function Vendas() {
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"></td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">Tele</strong></td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"></td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${(valorTele).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">R$ ${(valorTele)}</td>
                     </tr>
               </tbody>
             </table>
       
-            <p style="font-size: 14px; margin-top: 20px; border: 1px solid #000; padding: 10px;">${observacoes}</p>
+            ${observacoes ? `<p style="font-size: 14px; margin-top: 20px; border: 1px solid #000; padding: 10px;">${observacoes}</p>` : ""} 
 
             <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
-              <h3 style="font-weight: bold;">Total: ${(valorTotal)} - ${formaPagamento}</h3>
-              <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" ? `Valor Pago: ${(parseFloat((trocoPquanto).replace(".", "").replace(",", "."))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</p>
-              <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" ? `Troco: ${(parseFloat(((trocoPquanto).replace(".", "").replace(",", "."))) - parseFloat((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", ""))).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}</strong></p>
+              <h3 style="font-weight: bold;">Total: ${(valorTotal).replace(',00', '')} - ${formaPagamento}</h3>
+              <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" ? `Valor Pago: R$ ${(parseInt((trocoPquanto)))}` : ""}</p>
+              <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" ? `Troco: R$ ${(parseInt(((trocoPquanto).replace('.', '').replace(',', '.'))) - parseInt((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", "")))}` : ""}</strong></p>
             </div>
+            <p style="margin-top: 25px; font-size: 1px;">.</p>
           </div>
         `;
     }
@@ -325,7 +326,6 @@ export default function Vendas() {
                     border-spacing: 0;
                 }
               </style>
-
               <body>
                 ${textoPedido}
                 <script>
