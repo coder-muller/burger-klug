@@ -30,7 +30,7 @@ export function CardComponent({ title, itens, quantidades, onAdd, onRemove }: ca
             <CardHeader>
                 <CardTitle>{title}</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2 max-h-[430px] overflow-y-auto p-3">
+            <CardContent className="flex flex-col gap-2 max-h-[370px] overflow-y-auto p-3">
                 {itens.map((produto) => (
                     <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => onAdd(produto)}>
                         <div className="flex items-center justify-between w-full">

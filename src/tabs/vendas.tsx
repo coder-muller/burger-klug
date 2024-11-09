@@ -11,8 +11,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { CardComponent } from "@/components/produtoList";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 
-interface Produto {
+export interface Produto {
     id: string,
     nome: string,
     categoria: string,
@@ -20,9 +21,24 @@ interface Produto {
     adicionais: Adicionais[]
 }
 
-interface Adicionais {
+export interface Adicionais {
     nome: string,
     valor: number
+}
+
+export interface Cliente {
+    nome: string;
+    endereco: string;
+}
+
+export interface Pedido {
+    id: string
+    cliente: Cliente;
+    produtos: { item: Produto; quantidade: number }[];
+    valorTeleEntrega: number;
+    observacao: string;
+    formaPagamento: string;
+    data: Date;
 }
 
 export default function Vendas() {
@@ -48,6 +64,8 @@ export default function Vendas() {
     const [formaPagamento, setFormaPagamento] = useState<string>('')
     const [trocoPquanto, setTrocoPquanto] = useState<string>('')
     const [observacoes, setObservacoes] = useState<string>('')
+
+    const [isTeste, setIsTeste] = useState<boolean>(false)
 
     const [itensVenda, setItensVenda] = useState<Produto[]>([])
     const [quantidades, setQuantidades] = useState<{ [key: string]: number }>({})
@@ -217,6 +235,40 @@ export default function Vendas() {
         return agrupado;
     }
 
+    function finalizarAtendimento(): void {
+
+        if (isTeste) {
+            setIsOpen(false)
+            limparPedido()
+            toast.success("Pedido finalizado com sucesso(Modo de Teste)!")
+            return
+        }
+
+        const valorTeleEntrega = valorTele.replace(',', '.')
+        const produtosAgrupados = agruparItens(itensVenda)
+
+        const pedidoFinalizado: Pedido = {
+            id: uuidv4(),
+            cliente: {
+                nome: nomeCliente,
+                endereco: enderecoCliente
+            },
+            produtos: produtosAgrupados,
+            valorTeleEntrega: parseFloat(valorTeleEntrega),
+            observacao: observacoes,
+            formaPagamento: formaPagamento,
+            data: new Date()
+        }
+
+        const pedidos = JSON.parse(localStorage.getItem("pedidos") || "[]")
+        pedidos.push(pedidoFinalizado)
+        localStorage.setItem("pedidos", JSON.stringify(pedidos))
+
+        limparPedido()
+
+        toast.success("Pedido finalizado com sucesso!")
+    }
+
     function formatarPedidoParaImpressao(pedido: Produto[], cliente: { nome: string; endereco: string }, valorTotal: string, valorTele: number): string {
         const agrupado = agruparItens(pedido);
 
@@ -260,13 +312,14 @@ export default function Vendas() {
               </tbody>
             </table>
       
-            ${observacoes ? `<p style="font-size: 14px; margin-top: 20px; border: 1px solid #000; padding: 10px;">${observacoes}</p>` : ""} 
-
             <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
-              <h3 style="font-weight: bold;">Total: ${(valorTotal).replace(',00', '')} - ${formaPagamento}</h3>
-              <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" ? `Valor Pago: R$ ${(parseInt((trocoPquanto)))}` : ""}</p>
-              <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" ? `Troco: R$ ${(parseInt(((trocoPquanto).replace('.', '').replace(',', '.'))) - parseInt((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", "")))}` : ""}</strong></p>
+            <h3 style="font-weight: bold;">Total: ${(valorTotal).replace(',00', '')} - ${formaPagamento}</h3>
+            <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" ? `Valor Pago: R$ ${(parseInt((trocoPquanto)))}` : ""}</p>
+            <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" ? `Troco: R$ ${(parseInt(((trocoPquanto).replace('.', '').replace(',', '.'))) - parseInt((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", "")))}` : ""}</strong></p>
             </div>
+
+            ${observacoes ? `<p style="font-size: 14px; margin-top: 20px; border: 1px solid #000; padding: 10px;">${observacoes}</p>` : ""} 
+            
             <p style="margin-top: 25px; font-size: 1px;">.</p>
           </div>
         `;
@@ -411,7 +464,7 @@ export default function Vendas() {
                                     <Label>Forma de Pagamento</Label>
                                     <Select defaultValue={formaPagamento} onValueChange={(e) => setFormaPagamento(e)} value={formaPagamento}>
                                         <SelectTrigger className="w-full">
-                                            <SelectValue placeholder="Selecione uma categoria" />
+                                            <SelectValue placeholder="Forma de Pagamento" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectGroup>
@@ -432,10 +485,17 @@ export default function Vendas() {
                                     <Label>Observações</Label>
                                     <Textarea placeholder="Observações" value={observacoes} onChange={(e) => setObservacoes(e.target.value)} />
                                 </div>
+                                <div className="flex items-center justify-start gap-2 mt-2">
+                                    <Checkbox checked={isTeste} onCheckedChange={e => setIsTeste(e === true)} />
+                                    <Label className="font-normal">Modo de Teste</Label>
+                                </div>
                             </div>
                         </div>
                         <SheetFooter>
-                            <Button variant={"default"} onClick={() => imprimirPedido(itensVenda)}>
+                            <Button variant={"default"} onClick={() => {
+                                imprimirPedido(itensVenda)
+                                finalizarAtendimento()
+                            }}>
                                 Finalizar Pedido
                             </Button>
                             <SheetClose asChild>

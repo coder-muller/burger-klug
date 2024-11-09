@@ -2,53 +2,61 @@ import { toast } from "sonner";
 import { db } from "./firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 
+const keysToBackup = ["pedidos", "produtos"];
+
 export async function migrateDataToFirebase() {
-    const dataFromLocalStorage = localStorage.getItem("produtos");
-    if (!dataFromLocalStorage) return;
-
-    const parsedData = JSON.parse(dataFromLocalStorage);
-
     try {
-        const docRef = doc(db, "produtos", "backup_produtos");
-        const docSnap = await getDoc(docRef);
+        for (const key of keysToBackup) {
+            const dataFromLocalStorage = localStorage.getItem(key);
+            if (!dataFromLocalStorage) continue; 
 
-        if (docSnap.exists()) {
-            await setDoc(docRef, { produtos: parsedData }, { merge: true });
-            console.log("Backup atualizado com sucesso!");
-            toast.success("Backup atualizado com sucesso!");
-        } else {
-            await setDoc(docRef, { produtos: parsedData });
-            console.log("Backup criado com sucesso!");
-            toast.success("Backup criado com sucesso!");
+            const parsedData = JSON.parse(dataFromLocalStorage);
+            const docRef = doc(db, key, `backup_${key}`);
+
+            const docSnap = await getDoc(docRef);
+            if (docSnap.exists()) {
+                await setDoc(docRef, { [key]: parsedData }, { merge: true });
+                toast.success(`Backup de ${key} atualizado com sucesso!`);
+                console.log(`Backup de ${key} atualizado com sucesso!`);
+            } else {
+                await setDoc(docRef, { [key]: parsedData });
+                toast.success(`Backup de ${key} criado com sucesso!`);
+                console.log(`Backup de ${key} criado com sucesso!`);
+            }
         }
+        toast.success("Backup de todos os dados atualizado com sucesso!");
+        console.log("Backup de todos os dados atualizado com sucesso!");
     } catch (error) {
-        console.error("Erro ao migrar dados:", error);
         toast.error("Erro ao migrar dados!");
+        console.error("Erro ao migrar dados:", error);
     }
 }
 
 export async function restoreDataFromFirebase() {
     try {
-        const docRef = doc(db, "produtos", "backup_produtos");
-        const docSnap = await getDoc(docRef);
+        for (const key of keysToBackup) {
+            const docRef = doc(db, key, `backup_${key}`);
+            const docSnap = await getDoc(docRef);
 
-        if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (data && data.produtos) {
-                localStorage.setItem("produtos", JSON.stringify(data.produtos));
-                console.log("Dados restaurados com sucesso!");
-                toast.success("Dados restaurados com sucesso!");
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data && data[key]) {
+                    localStorage.setItem(key, JSON.stringify(data[key]));
+                    toast.success(`Dados de ${key} restaurados com sucesso!`);
+                    console.log(`Dados de ${key} restaurados com sucesso!`);
+                } else {
+                    toast.error(`Nenhum dado encontrado para ${key}.`);
+                    console.warn(`Nenhum dado encontrado para ${key}.`);
+                }
             } else {
-                console.warn("Nenhum dado encontrado para restaurar.");
-                toast.error("Nenhum dado encontrado para restaurar.");
+                toast.error(`Documento de backup para ${key} não encontrado.`);
+                console.warn(`Documento de backup para ${key} não encontrado.`);
             }
-        } else {
-            console.warn("Documento de backup não encontrado.");
-            toast.error("Documento de backup não encontrado.");
         }
+        toast.success("Dados restaurados com sucesso!");
+        console.log("Dados restaurados com sucesso!");
     } catch (error) {
-        console.error("Erro ao restaurar dados:", error);
         toast.error("Erro ao restaurar dados!");
+        console.error("Erro ao restaurar dados:", error);
     }
 }
-
