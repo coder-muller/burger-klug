@@ -24,36 +24,36 @@ export default function Pedidos() {
     }, [intervalo, pedidos])
 
     function handleFilter() {
-        const now = new Date()
-        let startDate: Date
-
+        const now = new Date();
+        let startDate;
         switch (intervalo) {
-            case "Semana":
-                startDate = new Date(now)
-                startDate.setDate(now.getDate() - now.getDay() + 1)
-                break
+            case "Semana": {
+
+                const dayOfWeek = now.getDay();
+                const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+                startDate = new Date(now);
+                startDate.setDate(now.getDate() - daysToSubtract);
+                startDate.setHours(0, 0, 0, 0);
+                break;
+            }
             case "Mês":
-                startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-                break
+                startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+                break;
             case "Ano":
                 startDate = new Date(now.getFullYear(), 0, 1);
                 break;
             default:
-                startDate = new Date(now)
-                startDate.setHours(0, 0, 0, 0)
-                break
+                startDate = new Date(now);
+                startDate.setHours(0, 0, 0, 0);
+                break;
         }
-
-        const filteredPedidos = pedidos.filter(pedido => pedido.data >= startDate)
-
-        setPedidosFiltrados(filteredPedidos)
-
+        const filteredPedidos = pedidos.filter(pedido => pedido.data >= startDate);
+        setPedidosFiltrados(filteredPedidos);
         const totalValue = filteredPedidos.reduce((total, pedido) =>
             total + pedido.valorTeleEntrega + pedido.produtos.reduce((produtoTotal, { item, quantidade }) =>
                 produtoTotal + quantidade * (item.valor + item.adicionais.reduce((soma, adicional) => soma + adicional.valor, 0)), 0
             ), 0
         );
-
         setValorTotalPedidos(totalValue);
         setTotalPedidos(filteredPedidos.length);
     }
@@ -97,7 +97,7 @@ export default function Pedidos() {
                                         <div className="flex flex-col items-start justify-start gap-1">
                                             <Label>{quantidade}x - {item.categoria} | {item.nome}</Label>
                                             {item.adicionais.map((adicional) => (
-                                                <Label key={adicional.nome} className="opacity-60 ml-2">
+                                                <Label key={adicional.valor} className="opacity-60 ml-2">
                                                     - {adicional.nome} | R$ {adicional.valor.toFixed(0)}
                                                 </Label>
                                             ))}
@@ -109,7 +109,7 @@ export default function Pedidos() {
                             <p className="mt-2 text-sm text-center">{pedido.cliente.endereco}</p>
                             {pedido.observacao && <p className="text-sm text-center">Observações: {pedido.observacao}</p>}
                             <div className="flex flex-col items-end justify-start mt-2 px-2">
-                                <p>Tele: R$ {pedido.valorTeleEntrega.toFixed(0)}</p>
+                                <p>Tele: R$ {pedido.valorTeleEntrega ? pedido.valorTeleEntrega.toFixed(0) : 0}</p>
                                 <p className="font-bold">
                                     Total: R$ {(pedido.valorTeleEntrega + pedido.produtos.reduce((total, { item, quantidade }) =>
                                         total + quantidade * (item.valor + item.adicionais.reduce((soma, adicional) => soma + adicional.valor, 0)), 0)).toFixed(0)} - {pedido.formaPagamento}

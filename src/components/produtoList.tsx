@@ -32,13 +32,13 @@ export function CardComponent({ title, itens, quantidades, onAdd, onRemove }: ca
             </CardHeader>
             <CardContent className="flex flex-col gap-2 max-h-[370px] overflow-y-auto p-3">
                 {itens.map((produto) => (
-                    <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" onClick={() => onAdd(produto)}>
+                    <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" key={produto.id} onClick={() => onAdd(produto)}>
                         <div className="flex items-center justify-between w-full">
                             <h1>{produto.nome}</h1>
                             <div className="flex items-center gap-4">
                                 {quantidades[produto.nome] > 0 && (
                                     <>
-                                        <span>{quantidades[produto.nome]}</span>
+                                        <span key={quantidades[produto.id]}>{quantidades[produto.nome]}</span>
                                         <MinusCircle className="cursor-pointer" onClick={(e) => onRemove(e, produto)} />
                                     </>
                                 )}
