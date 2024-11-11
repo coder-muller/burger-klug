@@ -314,8 +314,8 @@ export default function Vendas() {
       
             <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
             <h3 style="font-weight: bold;">Total: ${(valorTotal).replace(',00', '')} - ${formaPagamento}</h3>
-            <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" ? `Valor Pago: R$ ${(parseInt((trocoPquanto)))}` : ""}</p>
-            <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" ? `Troco: R$ ${(parseInt(((trocoPquanto).replace('.', '').replace(',', '.'))) - parseInt((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", "")))}` : ""}</strong></p>
+            <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" && trocoPquanto ? `Valor Pago: R$ ${(parseInt((trocoPquanto)))}` : ""}</p>
+            <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" && trocoPquanto ? `Troco: R$ ${(parseInt(((trocoPquanto).replace('.', '').replace(',', '.'))) - parseInt((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", "")))}` : ""}</strong></p>
             </div>
 
             ${observacoes ? `<p style="font-size: 14px; margin-top: 20px; border: 1px solid #000; padding: 10px;">${observacoes}</p>` : ""} 
