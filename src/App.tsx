@@ -13,6 +13,7 @@ import { DialogContent, DialogDescription, DialogFooter, DialogTitle } from "./c
 import { useState } from "react";
 import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
+import Analise from "./tabs/analise";
 
 export default function App() {
 
@@ -57,12 +58,16 @@ export default function App() {
         <div className="flex items-center justify-center">
           <TabsList>
             <TabsTrigger value="vendas">Vendas</TabsTrigger>
+            <TabsTrigger value="analise">Análise</TabsTrigger>
             <TabsTrigger value="pedidos">Histórico de Pedidos</TabsTrigger>
             <TabsTrigger value="produtos">Produtos</TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="vendas" className="w-screen px-10 py-3">
           <Vendas />
+        </TabsContent>
+        <TabsContent value="analise" className="w-screen px-10 py-3">
+          <Analise />
         </TabsContent>
         <TabsContent value="produtos" className="w-screen px-10 py-3">
           <Produtos />
