@@ -299,7 +299,7 @@ export default function Vendas() {
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${item.nome}</strong></td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${adicionaisTexto}</strong></td>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">R$ ${(quantidade * (item.valor + adicionaisValor))}</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; white-space: nowrap;">R$ ${(quantidade * (item.valor + adicionaisValor))}</td>
                     </tr>
                   `;
         }).join('')}
