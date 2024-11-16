@@ -240,6 +240,7 @@ export default function Vendas() {
         if (isTeste) {
             setIsOpen(false)
             limparPedido()
+            setIsTeste(false)
             toast.success("Pedido finalizado com sucesso(Modo de Teste)!")
             return
         }
@@ -273,7 +274,7 @@ export default function Vendas() {
         const agrupado = agruparItens(pedido);
 
         return `
-          <div style="display: flex; flex-direction: column; align-items: center; justfity-content: center; margin: 20px;">
+          <div style="display: flex; flex-direction: column; align-items: center; justfity-content: center; margin: 20px; padding: 0 20px;">
             <div style="text-align: center;">
               <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyOl89nc8Kbd_khdQfhd7Cu0nnoBJkmACYuQ&s" alt="Logo" style="width: 100px; border-radius: 100%;">
             </div>
@@ -284,7 +285,7 @@ export default function Vendas() {
             <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
               <thead>
                 <tr>
-                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Qtde</th>
+                  <th style="border-bottom: 1px solid #000; padding: 8px; text-align: right;">Qtde</th>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Item</th>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Observações</th>
                   <th style="border-bottom: 1px solid #000; padding: 8px; text-align: left;">Valor</th>
@@ -296,7 +297,7 @@ export default function Vendas() {
             const adicionaisValor = item.adicionais.map(adicional => adicional.valor).reduce((acumulador, valor) => acumulador + valor, 0);
             return `
                     <tr>
-                        <td style="padding: 8px; border-bottom: 1px solid #ddd;">${quantidade}x</td>
+                        <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">${quantidade}x</td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${item.nome}</strong></td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong style="font-weight: bold;">${adicionaisTexto}</strong></td>
                         <td style="padding: 8px; border-bottom: 1px solid #ddd; white-space: nowrap;">R$ ${(quantidade * (item.valor + adicionaisValor))}</td>

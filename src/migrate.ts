@@ -55,6 +55,7 @@ export async function restoreDataFromFirebase() {
         }
         toast.success("Dados restaurados com sucesso!");
         console.log("Dados restaurados com sucesso!");
+        localStorage.setItem("backupDate", new Date().toISOString());
     } catch (error) {
         toast.error("Erro ao restaurar dados!");
         console.error("Erro ao restaurar dados:", error);

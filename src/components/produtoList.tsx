@@ -34,7 +34,7 @@ export function CardComponent({ title, itens, quantidades, onAdd, onRemove }: ca
                 {itens.map((produto) => (
                     <div className="flex items-center justify-between w-full border rounded-md px-5 py-2 cursor-pointer" key={produto.id} onClick={() => onAdd(produto)}>
                         <div className="flex items-center justify-between w-full">
-                            <h1>{produto.nome}</h1>
+                            <h1 className="font-bold">{produto.nome}</h1>
                             <div className="flex items-center gap-4">
                                 {quantidades[produto.nome] > 0 && (
                                     <>

@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PlusCircle, SearchIcon, Trash } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Dialog, DialogClose, DialogFooter, DialogHeader, DialogTitle, DialogContent } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { Select } from "@radix-ui/react-select";
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select } from "@radix-ui/react-select";
+import { Pencil, PlusCircle, Trash } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface Produto {
     nome: string,
@@ -17,76 +17,140 @@ interface Produto {
 
 export default function Produtos() {
     const [produtos, setProdutos] = useState<Produto[]>([])
-    const [allProdutos, setAllProdutos] = useState<Produto[]>([])
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+
     const [produto, setProduto] = useState<string>("")
     const [categoria, setCategoria] = useState<string>("")
     const [valor, setValor] = useState<string>("")
+
     const [produtoSearch, setProdutoSearch] = useState<string>("")
+    const [categoriaSearch, setCategoriaSearch] = useState<string>("Todas")
+
+    const [isOpen, setIsOpen] = useState<boolean>(false)
+    const [selectedItem, setSelectedItem] = useState<Produto | null>(null)
 
     useEffect(() => {
         const storedProdutos: Produto[] = JSON.parse(localStorage.getItem("produtos") || "[]")
         storedProdutos.sort((b, a) => a.categoria.localeCompare(b.categoria))
         setProdutos(storedProdutos)
-        setAllProdutos(storedProdutos)
     }, [])
 
+    useEffect(() => {
+        handleFilter()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [produtoSearch, categoriaSearch])
+
+
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
+        e.preventDefault();
+
+        const produtosDatabase: Produto[] = JSON.parse(localStorage.getItem("produtos") || "[]");
+
         const newProduto: Produto = {
             nome: produto,
             categoria: categoria,
-            valor: parseFloat(valor)
+            valor: parseFloat(valor),
+        };
+
+        let updatedProdutos = [...produtosDatabase];
+
+        if (selectedItem) {
+            updatedProdutos = updatedProdutos.map((item) =>
+                item.nome === selectedItem.nome &&
+                    item.valor === selectedItem.valor &&
+                    item.categoria === selectedItem.categoria
+                    ? newProduto
+                    : item
+            );
+        } else {
+            updatedProdutos.push(newProduto);
         }
-        const updatedProdutos = [...produtos, newProduto]
-        setProdutos(updatedProdutos)
-        setAllProdutos(updatedProdutos)
-        localStorage.setItem("produtos", JSON.stringify(updatedProdutos))
+
+        localStorage.setItem("produtos", JSON.stringify(updatedProdutos));
+        setProdutos(updatedProdutos.sort((b, a) => a.categoria.localeCompare(b.categoria)));
+
+        setIsOpen(false);
+        toast.success(selectedItem ? "Produto editado com sucesso!" : "Produto adicionado com sucesso!");
+    };
+
+
+
+    const handleOpenNew = () => {
         setProduto("")
         setCategoria("")
         setValor("")
-        toast.success("Produto adicionado com sucesso!")
-        setIsOpen(false)
+        setSelectedItem(null)
+        setIsOpen(true)
+    }
+
+    const handleOpenEdit = (produto: Produto) => {
+        setProduto(produto.nome)
+        setCategoria(produto.categoria)
+        setValor(produto.valor.toString())
+        setSelectedItem(produto)
+        setIsOpen(true)
     }
 
     const handleDelete = (produto: Produto) => {
         const updatedProdutos = produtos.filter(p => p !== produto)
         setProdutos(updatedProdutos)
-        setAllProdutos(updatedProdutos) 
         localStorage.setItem("produtos", JSON.stringify(updatedProdutos))
         toast.success("Produto removido com sucesso!")
     }
 
     const handleFilter = () => {
-        if (produtoSearch === "") {
-            setProdutos(allProdutos)
-        } else {
-            const filteredProdutos = allProdutos.filter((produto) =>
-                produto.nome.toLowerCase().includes(produtoSearch.toLowerCase())
-            )
-            setProdutos(filteredProdutos)
-        }
-    }
+        const produtosDatabase: Produto[] = JSON.parse(localStorage.getItem("produtos") || "[]");
+    
+        const filteredProdutos = produtosDatabase.filter((produto) => {
+            const matchesNome = produto.nome.toLowerCase().includes(produtoSearch.toLowerCase());
+            const matchesCategoria = categoriaSearch === "Todas" || produto.categoria === categoriaSearch;
+            return matchesNome && matchesCategoria;
+        });
+    
+        setProdutos(filteredProdutos.sort((b, a) => a.categoria.localeCompare(b.categoria)));
+    };
+    
+
 
     return (
         <div className="flex flex-col items-center justify-center w-11/12 m-auto gap-2">
-            <div className="flex items-center justify-between w-full">
-                <div className="flex items-center justify-start gap-2">
-                    <Input placeholder="Pesquisar produto" className="w-auto" value={produtoSearch} onChange={(e) => setProdutoSearch(e.target.value)} />
-                    <Button variant={"secondary"} onClick={handleFilter}><SearchIcon /></Button>
+            <div className="flex items-end justify-between w-full">
+                <div className="flex items-end justify-start gap-2 w-full">
+                    <div className="w-1/6">
+                    <Label className="font-normal">Pesquisar produto</Label>
+                    <Input placeholder="Pesquisar produto" className="w-full" value={produtoSearch} onChange={(e) => setProdutoSearch(e.target.value)} />
+                    </div>
+                    <div className="w-1/6">
+                        <Label className="font-normal">Categoria</Label>
+                        <Select onValueChange={(e) => setCategoriaSearch(e)} value={categoriaSearch}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecione uma categoria" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="Todas">Todas</SelectItem>
+                                    <SelectItem value="Hamburgueres">Hamburgueres</SelectItem>
+                                    <SelectItem value="Batatas">Batatas</SelectItem>
+                                    <SelectItem value="Bebidas">Bebidas</SelectItem>
+                                    <SelectItem value="Adicionais">Adicionais</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                 </div>
-                <Button variant={"default"} onClick={() => setIsOpen(true)}>
+                <Button variant={"default"} onClick={() => handleOpenNew()}>
                     <PlusCircle />
                     Adicionar
                 </Button>
             </div>
-            <div className="w-full border rounded-md max-h-[450px] overflow-y-auto">
+            <div className="w-full border rounded-md max-h-[420px] overflow-y-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>
                             <TableHead>Produto</TableHead>
                             <TableHead>Categoria</TableHead>
                             <TableHead>Valor</TableHead>
+                            <TableHead></TableHead>
                             <TableHead></TableHead>
                         </TableRow>
                     </TableHeader>
@@ -96,7 +160,8 @@ export default function Produtos() {
                                 <TableCell>{produto.nome}</TableCell>
                                 <TableCell>{produto.categoria}</TableCell>
                                 <TableCell>{produto.valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 2 })}</TableCell>
-                                <TableCell><Trash className="w-4 h-4 cursor-pointer" onClick={() => handleDelete(produto)} /></TableCell>
+                                <TableCell><Pencil className="w-4 h-4 cursor-pointer" onClick={() => handleOpenEdit(produto)} /></TableCell>
+                                <TableCell><Trash className="w-4 h-4 cursor-pointer" onClick={() => toast.warning("Você tem certeza que deseja remover esse produto?", {action: {label: "Sim", onClick: () => handleDelete(produto)}})} /></TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
@@ -105,7 +170,7 @@ export default function Produtos() {
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Novo Produto</DialogTitle>
+                        <DialogTitle>{selectedItem ? "Editar Produto" : "Novo Produto"}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleSubmit}>
                         <div>
@@ -121,7 +186,7 @@ export default function Produtos() {
                                 <SelectContent>
                                     <SelectGroup>
                                         <SelectItem value="Hamburgueres">Hamburgueres</SelectItem>
-                                        <SelectItem value="Batatas">Batatas</SelectItem>    
+                                        <SelectItem value="Batatas">Batatas</SelectItem>
                                         <SelectItem value="Bebidas">Bebidas</SelectItem>
                                         <SelectItem value="Adicionais">Adicionais</SelectItem>
                                     </SelectGroup>
@@ -136,7 +201,7 @@ export default function Produtos() {
                             <DialogClose asChild>
                                 <Button type="reset" variant={"secondary"}>Cancelar</Button>
                             </DialogClose>
-                            <Button type="submit">Salvar</Button>
+                            <Button type="submit">{selectedItem ? "Editar" : "Adicionar"}</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
