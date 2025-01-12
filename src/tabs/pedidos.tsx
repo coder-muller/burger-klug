@@ -16,6 +16,7 @@ export default function Pedidos() {
     const [totalPedidos, setTotalPedidos] = useState<number>(0);
     const [dataInicio, setDataInicio] = useState<string>("")
     const [dataFim, setDataFim] = useState<string>("")
+    const [formaPagamentoSearch, setFormaPagamentoSearch] = useState<string>("Todas")
     const dataInicioRef = useRef<HTMLInputElement>(null)
     const dataFimRef = useRef<HTMLInputElement>(null)
 
@@ -29,7 +30,7 @@ export default function Pedidos() {
 
     useEffect(() => {
         handleFilter()
-    }, [intervalo, pedidos])
+    }, [intervalo, pedidos, formaPagamentoSearch])
 
     function parseDate(dateString: string): Date | null {
         const [day, month, year] = dateString.split("/").map(Number);
@@ -80,7 +81,7 @@ export default function Pedidos() {
                 break;
         }
 
-        const filteredPedidos = pedidos.filter((pedido) => {
+        let filteredPedidos = pedidos.filter((pedido) => {
             if (startDate && endDate) {
                 return pedido.data >= startDate && pedido.data <= endDate;
             } else if (startDate) {
@@ -89,13 +90,21 @@ export default function Pedidos() {
             return true;
         });
 
+        if (formaPagamentoSearch !== "Todas") {
+            filteredPedidos = filteredPedidos.filter(pedido => pedido.formaPagamento === formaPagamentoSearch);
+        }
+
         setPedidosFiltrados(filteredPedidos);
 
-        const totalValue = filteredPedidos.reduce((total, pedido) =>
+        let totalValue = filteredPedidos.reduce((total, pedido) =>
             total + pedido.valorTeleEntrega + pedido.produtos.reduce((produtoTotal, { item, quantidade }) =>
                 produtoTotal + quantidade * (item.valor + item.adicionais.reduce((soma, adicional) => soma + adicional.valor, 0)), 0
             ), 0
         );
+
+        const descontoTotal = filteredPedidos.reduce((total, pedido) => total + parseFloat(pedido.desconto ? pedido.desconto.toString() : "0"), 0);
+
+        totalValue = totalValue - descontoTotal;
 
         setValorTotalPedidos(totalValue);
         setTotalPedidos(filteredPedidos.length);
@@ -142,6 +151,21 @@ export default function Pedidos() {
                             <Button variant={"secondary"} onClick={() => handleFilter()}><SearchIcon /></Button>
                         </>
                     )}
+                    <div className="w-1/6">
+                        <Select defaultValue={formaPagamentoSearch} onValueChange={(e) => setFormaPagamentoSearch(e)} value={formaPagamentoSearch}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Selecione uma forma de pagamento" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="Todas">Todas</SelectItem>
+                                    <SelectItem value="PIX">PIX</SelectItem>
+                                    <SelectItem value="Cartão">Cartão</SelectItem>
+                                    <SelectItem value="Dinheiro">Dinheiro</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="flex items-center justify-end">
@@ -178,14 +202,19 @@ export default function Pedidos() {
                             {pedido.observacao && <p className="text-sm text-center">Observações: {pedido.observacao}</p>}
                             <div className="flex items-end justify-between mt-2 px-2">
                                 <div>
-                                    <Button variant={"outline"} onClick={() => toast.warning("Você tem certeza que deseja excluir esse pedido?", {action: {label: "Sim", onClick: () => handleDelete(pedido)}})}>Excluir</Button>
+                                    <Button variant={"outline"} onClick={() => toast.warning("Você tem certeza que deseja excluir esse pedido?", { action: { label: "Sim", onClick: () => handleDelete(pedido) } })}>Excluir</Button>
                                 </div>
                                 <div className="flex flex-col items-end justify-end">
                                     <p>Tele: R$ {pedido.valorTeleEntrega ? pedido.valorTeleEntrega.toFixed(0) : 0}</p>
                                     <p className="font-bold">
-                                        Total: R$ {(pedido.valorTeleEntrega + pedido.produtos.reduce((total, { item, quantidade }) =>
-                                            total + quantidade * (item.valor + item.adicionais.reduce((soma, adicional) => soma + adicional.valor, 0)), 0)).toFixed(0)} - {pedido.formaPagamento}
+                                        Total: R$ {(
+                                            (pedido.valorTeleEntrega +
+                                                pedido.produtos.reduce((total, { item, quantidade }) =>
+                                                    total + quantidade * (item.valor + item.adicionais.reduce((soma, adicional) => soma + adicional.valor, 0)), 0))
+                                            - parseFloat(pedido.desconto ? pedido.desconto.toString() : "0")
+                                        ).toFixed(2).replace(".", ",")} - {pedido.formaPagamento}
                                     </p>
+
                                 </div>
 
                             </div>

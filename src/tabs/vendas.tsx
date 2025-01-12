@@ -39,6 +39,7 @@ export interface Pedido {
     observacao: string;
     formaPagamento: string;
     data: Date;
+    desconto: number;
 }
 
 export default function Vendas() {
@@ -69,6 +70,8 @@ export default function Vendas() {
 
     const [itensVenda, setItensVenda] = useState<Produto[]>([])
     const [quantidades, setQuantidades] = useState<{ [key: string]: number }>({})
+
+    const [descontoPedido, setDescontoPedido] = useState<string>('')
 
     useEffect(() => {
         const storedProdutos: Produto[] = JSON.parse(localStorage.getItem("produtos") || "[]")
@@ -131,9 +134,11 @@ export default function Vendas() {
         setQuantidades({});
         setNomeCliente('')
         setEnderecoCliente('')
+        setFormaPagamento('')
         setValorTele('')
         setTrocoPquanto('')
         setObservacoes('')
+        setDescontoPedido('5')
         toast.info("Pedido limpo com sucesso!");
     };
 
@@ -203,11 +208,16 @@ export default function Vendas() {
 
     function calcularTotalPedido(pedido: Array<{ valor: number; adicionais: Array<{ valor: number }> }>): string {
 
-        const total = pedido.reduce((acumulador, item) =>
+        let total = pedido.reduce((acumulador, item) =>
             acumulador + item.valor + item.adicionais.reduce((acc, adicional) => acc + adicional.valor, 0), 0);
 
-        const valorTotal = total + Number((valorTele).replace(",", "."));
-        return valorTotal.toLocaleString('pt-BR', {
+        total = total + Number((valorTele).replace(",", "."));
+
+        if (formaPagamento === "Dinheiro" && descontoPedido) {
+            total = total * (1 - (Number(descontoPedido) / 100))
+        }
+
+        return total.toLocaleString('pt-BR', {
             style: 'currency',
             currency: 'BRL',
             minimumFractionDigits: 2,
@@ -236,39 +246,73 @@ export default function Vendas() {
     }
 
     function finalizarAtendimento(): void {
-
         if (isTeste) {
-            setIsOpen(false)
-            limparPedido()
-            setIsTeste(false)
-            toast.success("Pedido finalizado com sucesso(Modo de Teste)!")
-            return
+            setIsOpen(false);
+            limparPedido();
+            setIsTeste(false);
+            toast.success("Pedido finalizado com sucesso (Modo de Teste)!");
+            return;
         }
 
-        const valorTeleEntrega = valorTele.replace(',', '.')
-        const produtosAgrupados = agruparItens(itensVenda)
+        const valorTeleEntrega = parseFloat(valorTele.replace(",", "."));
+        const valorTotal = calcularTotalPedido(itensVenda).toString();
+        const valorTotalNumerico = parseFloat(
+            valorTotal
+                .replace(/\s/g, "")
+                .replace("R$", "")
+                .replace(".", "")
+                .replace(",", ".")
+        );
+
+        if (isNaN(valorTotalNumerico)) {
+            console.error("Valor total inválido:", valorTotal);
+            return;
+        }
+
+        const descontoPercentual = parseFloat(descontoPedido);
+
+        if (isNaN(descontoPercentual)) {
+            console.error("Desconto inválido:", descontoPedido);
+            return;
+        }
+
+        let totalsDesconto = itensVenda.reduce((acumulador, item) =>
+            acumulador + item.valor + item.adicionais.reduce((acc, adicional) => acc + adicional.valor, 0), 0);
+
+        totalsDesconto = totalsDesconto + parseFloat(valorTele.toString());
+
+        const valorTotalDescontado = totalsDesconto * (1 - descontoPercentual / 100);
+
+        const produtosAgrupados = agruparItens(itensVenda);
+
+        console.log(valorTotalNumerico)
 
         const pedidoFinalizado: Pedido = {
             id: uuidv4(),
             cliente: {
                 nome: nomeCliente,
-                endereco: enderecoCliente
+                endereco: enderecoCliente,
             },
             produtos: produtosAgrupados,
-            valorTeleEntrega: parseFloat(valorTeleEntrega),
+            valorTeleEntrega: valorTeleEntrega,
             observacao: observacoes,
             formaPagamento: formaPagamento,
-            data: new Date()
-        }
+            data: new Date(),
+            desconto: formaPagamento === "Dinheiro" && descontoPedido ? totalsDesconto - valorTotalDescontado : 0,
+        };
 
-        const pedidos = JSON.parse(localStorage.getItem("pedidos") || "[]")
-        pedidos.push(pedidoFinalizado)
-        localStorage.setItem("pedidos", JSON.stringify(pedidos))
+        console.log(pedidoFinalizado);
 
-        limparPedido()
+        const pedidos = JSON.parse(localStorage.getItem("pedidos") || "[]");
+        pedidos.push(pedidoFinalizado);
+        localStorage.setItem("pedidos", JSON.stringify(pedidos));
 
-        toast.success("Pedido finalizado com sucesso!")
+        limparPedido();
+
+        toast.success("Pedido finalizado com sucesso!");
     }
+
+
 
     function formatarPedidoParaImpressao(pedido: Produto[], cliente: { nome: string; endereco: string }, valorTotal: string, valorTele: number): string {
         const agrupado = agruparItens(pedido);
@@ -316,7 +360,15 @@ export default function Vendas() {
             <div style="text-align: right; width: 100%; margin-top: 20px; margin-right: 20px;">
             <h3 style="font-weight: bold;">Total: ${(valorTotal).replace(',00', '')} - ${formaPagamento}</h3>
             <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" && trocoPquanto ? `Valor Pago: R$ ${(parseInt((trocoPquanto)))}` : ""}</p>
-            <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" && trocoPquanto ? `Troco: R$ ${(parseInt(((trocoPquanto).replace('.', '').replace(',', '.'))) - parseInt((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", "")))}` : ""}</strong></p>
+            <p style="font-size: 14px; margin-top: 5px;"><strong style="font-weight: bold;">${formaPagamento == "Dinheiro" && trocoPquanto ? `Troco: R$ ${((parseFloat(((trocoPquanto).replace('.', '').replace(',', '.'))) - parseFloat((valorTotal).toString().replace(".", "").replace(",", ".").replace("R$", "")))).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}` : ""}</strong></p>
+            <p style="font-size: 14px; margin-top: 5px;">${formaPagamento == "Dinheiro" && descontoPedido !== '0' ? `Desconto: ${descontoPedido}% - ${((pedido.reduce((acumulador, item) =>
+            acumulador + item.valor + item.adicionais.reduce((acc, adicional) => acc + adicional.valor, 0), 0) + parseFloat(valorTele.toString())) * (Number(descontoPedido) / 100)).toLocaleString('pt-BR', {
+                style: 'currency',
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })
+                }` : ""}</p>
             </div>
 
             ${observacoes ? `<p style="font-size: 14px; margin-top: 20px; border: 1px solid #000; padding: 10px;">${observacoes}</p>` : ""} 
@@ -447,7 +499,7 @@ export default function Vendas() {
                                     </div>
                                 </>
                             ))}
-                            <h1 className="my-4 text-right"><span className="font-bold"> Total: R$ {calcularTotalPedido(itensVenda)}</span></h1>
+                            <h1 className="my-4 text-right"><span className="font-bold"> Total: {calcularTotalPedido(itensVenda)}</span></h1>
                             <div className="flex flex-col">
                                 <div>
                                     <Label>Nome do Cliente</Label>
@@ -477,10 +529,16 @@ export default function Vendas() {
                                     </Select>
                                 </div>
                                 {formaPagamento === "Dinheiro" && (
-                                    <div>
-                                        <Label>Troco para quanto?</Label>
-                                        <Input placeholder="Valor do pagamento" value={trocoPquanto} onChange={e => setTrocoPquanto(e.target.value)} />
-                                    </div>
+                                    <>
+                                        <div>
+                                            <Label>Troco para quanto?</Label>
+                                            <Input placeholder="Valor do pagamento" value={trocoPquanto} onChange={e => setTrocoPquanto(e.target.value)} />
+                                        </div>
+                                        <div>
+                                            <Label>Desconto(%)</Label>
+                                            <Input placeholder="Desconto" value={descontoPedido} onChange={e => setDescontoPedido(e.target.value)} />
+                                        </div>
+                                    </>
                                 )}
                                 <div>
                                     <Label>Observações</Label>
